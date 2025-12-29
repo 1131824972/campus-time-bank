@@ -1,0 +1,32 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: campus-time-bank
+
+  # 1. 数据库配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # 注意：如果你的 MySQL 密码不是 your_password，请在这里修改
+    url: jdbc:mysql://localhost:3306/time_bank_db?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&useSSL=false
+    username: root
+    password: your_password
+
+  # 2. Redis 配置
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 0
+      # password: 123456 # 如果有密码请取消注释
+
+# 3. MyBatis-Plus 配置
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 打印 SQL
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      logic-delete-field: deleted
+      id-type: auto
