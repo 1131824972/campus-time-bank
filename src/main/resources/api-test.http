@@ -21,15 +21,15 @@ Content-Type: application/json
     client.log("Token已获取: " + response.body.data.token);
 %}
 
-### 3. 发布任务
+### 3. 发布任务 (金额必须 >= 0.1)
 POST http://127.0.0.1:8080/api/tasks/publish
 Content-Type: application/json
 Authorization: Bearer {{auth_token}}
 
 {
-  "title": "测试任务",
-  "description": "测试一下",
-  "price": 0.0,
+  "title": "帮我拿个快递",
+  "description": "测试任务描述",
+  "price": 2.0,
   "category": "run",
-  "location": "二教"
+  "location": "二教301"
 }
