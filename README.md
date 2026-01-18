@@ -77,10 +77,6 @@ campus-time-bank/
 
 🚀 快速开始 (Getting Started)
 
-本项目支持两种运行模式：
-
-模式一：集成运行 (推荐，生产环境)
-
 无需安装 Node.js 环境，直接运行 Java 后端即可体验完整功能。
 
 准备数据库：创建数据库 time_bank_db 并导入初始化 SQL 脚本。
