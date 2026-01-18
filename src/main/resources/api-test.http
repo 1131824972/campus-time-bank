@@ -40,3 +40,18 @@ Authorization: Bearer {{auth_token}}
 {
   "orderId": 1
 }
+
+### --- 商城模块测试 ---
+
+### 8. 获取商品列表
+GET http://127.0.0.1:8080/api/mall/list
+Authorization: Bearer {{auth_token}}
+
+### 9. 兑换商品 (假设 ID 为 1)
+POST http://127.0.0.1:8080/api/mall/exchange
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+  "itemId": 1
+}
