@@ -1,0 +1,35 @@
+### 1. 注册
+POST http://127.0.0.1:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "2021008",
+  "password": "123456"
+}
+
+### 2. 登录
+POST http://127.0.0.1:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "2021008",
+  "password": "123456"
+}
+
+> {%
+    client.global.set("auth_token", response.body.data.token);
+    client.log("Token已获取: " + response.body.data.token);
+%}
+
+### 3. 发布任务
+POST http://127.0.0.1:8080/api/tasks/publish
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+  "title": "测试任务",
+  "description": "测试一下",
+  "price": 0.0,
+  "category": "run",
+  "location": "二教"
+}
