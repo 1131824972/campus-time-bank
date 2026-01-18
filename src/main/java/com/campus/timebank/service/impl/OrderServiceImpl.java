@@ -73,10 +73,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     public void confirmOrder(Long id) {
         Long userId = UserContext.getUserId();
 
-        // 1. 优先作为 OrderId 查询
         Order order = orderMapper.selectById(id);
 
-        // 2. 如果查不到，作为 TaskId 查询 (查找该任务的进行中订单)
         if (order == null) {
             QueryWrapper<Order> query = new QueryWrapper<>();
             query.eq("task_id", id).eq("status", 1);

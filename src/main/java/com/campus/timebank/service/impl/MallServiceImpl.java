@@ -62,7 +62,6 @@ public class MallServiceImpl implements IMallService {
         userMapper.updateById(user);
 
         // 5. 生成兑换记录 (含核销码)
-        // 使用 Hutool 工具包生成一个不带横线的 UUID
         String code = IdUtil.simpleUUID().toUpperCase();
 
         ExchangeRecord record = new ExchangeRecord();

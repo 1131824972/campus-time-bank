@@ -1,7 +1,7 @@
 package com.campus.timebank.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.campus.timebank.entity.Task; // 注意导入 Task
+import com.campus.timebank.entity.Task;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper

@@ -21,7 +21,7 @@ public class UserContext {
     }
 
     /**
-     * 清理（防止内存泄漏，非常重要）
+     * 清理
      */
     public static void remove() {
         userThreadLocal.remove();

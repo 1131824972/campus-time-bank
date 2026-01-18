@@ -28,8 +28,6 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
     @Autowired
     private UserMapper userMapper;
 
-    // 此时 this.baseMapper 就等同于 taskMapper，MyBatis-Plus 自动注入了
-    // 但为了保持原有代码逻辑不变，我们保留这个注入
     @Autowired
     private TaskMapper taskMapper;
 

@@ -13,8 +13,6 @@ import java.util.Date;
 public class JwtUtil {
 
     // 1. 定义密钥
-    // 注意：密钥必须足够长（至少32个字符），否则会报错 "Key length is too weak"
-    // 这里我们直接写死一个长字符串
     private static final String SECRET_KEY = "campus_time_bank_secure_key_2024_make_it_longer_than_32_bits";
 
     // 2. 过期时间：24小时 (单位毫秒)

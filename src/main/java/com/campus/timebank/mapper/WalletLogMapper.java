@@ -1,7 +1,7 @@
 package com.campus.timebank.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.campus.timebank.entity.WalletLog; // 注意导入 WalletLog
+import com.campus.timebank.entity.WalletLog;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper

@@ -33,9 +33,6 @@ public class UserController {
         return Result.success(user);
     }
 
-    /**
-     * 【新增】获取我的资金/信用流水
-     */
     @GetMapping("/logs")
     public Result<List<WalletLog>> getLogs() {
         Long userId = UserContext.getUserId();

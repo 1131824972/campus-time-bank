@@ -56,8 +56,6 @@ public class OrderController {
         if (id == null) return Result.error("订单ID或任务ID不能为空");
 
         try {
-            // Service 层现在的 confirmOrder 方法已经具备了：
-            // "先查 Order，查不到就查该 Task 对应的进行中 Order" 的能力
             orderService.confirmOrder(id);
             return Result.success("订单已完成，资金已结算");
         } catch (RuntimeException e) {
@@ -93,12 +91,7 @@ public class OrderController {
         if (taskIds.isEmpty()) {
             return Result.success(List.of());
         }
-
-        // 使用 MyBatis-Plus 的 listByIds 批量查询
         List<Task> tasks = taskService.listByIds(taskIds);
-
-        // 可选：在这里可以把 Order 的状态塞回 Task 对象里传给前端，
-        // 但为了简单，前端目前是根据 Task 表的状态显示的，通常也是同步的。
 
         return Result.success(tasks);
     }
