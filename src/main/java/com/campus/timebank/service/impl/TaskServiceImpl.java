@@ -2,6 +2,7 @@ package com.campus.timebank.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.campus.timebank.common.UserContext;
 import com.campus.timebank.entity.Task;
 import com.campus.timebank.entity.TaskDto;
@@ -18,12 +19,17 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 
+/**
+ * 继承 ServiceImpl<TaskMapper, Task> 以自动实现 IService 中的方法
+ */
 @Service
-public class TaskServiceImpl implements ITaskService {
+public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements ITaskService {
 
     @Autowired
     private UserMapper userMapper;
 
+    // 此时 this.baseMapper 就等同于 taskMapper，MyBatis-Plus 自动注入了
+    // 但为了保持原有代码逻辑不变，我们保留这个注入
     @Autowired
     private TaskMapper taskMapper;
 
@@ -65,32 +71,24 @@ public class TaskServiceImpl implements ITaskService {
         // 5. 记录资金流水
         WalletLog log = new WalletLog();
         log.setUserId(userId);
-        log.setAmount(dto.getPrice().negate()); // 记录为负数 (支出)
+        log.setAmount(dto.getPrice().negate());
         log.setType(2); // 2: 发布冻结
         log.setRemark("发布任务冻结: " + dto.getTitle());
         log.setCreateTime(LocalDateTime.now());
         walletLogMapper.insert(log);
     }
 
-    // --- 新增的方法 ---
     @Override
     public Page<Task> getTaskList(int pageNum, int pageSize, String category) {
-        // 1. 构建分页对象
         Page<Task> page = new Page<>(pageNum, pageSize);
-
-        // 2. 构建查询条件
         QueryWrapper<Task> query = new QueryWrapper<>();
-        query.eq("status", 0); // 只查待接单的
+        query.eq("status", 0);
 
-        // 如果传了分类，就按分类查
         if (StringUtils.hasLength(category) && !"all".equals(category)) {
             query.eq("category", category);
         }
 
-        // 按时间倒序（最新的在前面）
         query.orderByDesc("create_time");
-
-        // 3. 查询
         return taskMapper.selectPage(page, query);
     }
 }

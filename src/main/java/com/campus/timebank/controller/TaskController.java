@@ -2,19 +2,22 @@ package com.campus.timebank.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.campus.timebank.common.Result;
+import com.campus.timebank.common.UserContext;
 import com.campus.timebank.entity.Task;
 import com.campus.timebank.entity.TaskDto;
-import com.campus.timebank.service.ITaskService;
+import com.campus.timebank.service.impl.TaskServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/tasks")
 public class TaskController {
 
     @Autowired
-    private ITaskService taskService;
+    private TaskServiceImpl taskService;
 
     @PostMapping("/publish")
     public Result<String> publish(@RequestBody @Validated TaskDto dto) {
@@ -27,7 +30,7 @@ public class TaskController {
     }
 
     /**
-     * 获取任务列表
+     * 获取任务列表 (大厅)
      * @param page 页码 (默认1)
      * @param size 条数 (默认10)
      * @param category 分类 (可选)
@@ -40,5 +43,19 @@ public class TaskController {
     ) {
         Page<Task> result = taskService.getTaskList(page, size, category);
         return Result.success(result);
+    }
+
+    /**
+     * 获取我发布的任务
+     */
+    @GetMapping("/my")
+    public Result<List<Task>> myTasks() {
+        Long userId = UserContext.getUserId();
+        // 查询 publisher_id = 当前用户的任务，按时间倒序
+        List<Task> list = taskService.lambdaQuery()
+                .eq(Task::getPublisherId, userId)
+                .orderByDesc(Task::getCreateTime)
+                .list();
+        return Result.success(list);
     }
 }
