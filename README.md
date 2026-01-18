@@ -91,5 +91,3 @@ mvn spring-boot:run
 
 访问应用：
 打开浏览器访问 http://localhost:8080 (页面已集成在后端中)。
-
-Campus Time Bank © 2024
