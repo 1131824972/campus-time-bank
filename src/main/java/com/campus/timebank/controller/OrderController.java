@@ -4,8 +4,8 @@ import com.campus.timebank.common.Result;
 import com.campus.timebank.common.UserContext;
 import com.campus.timebank.entity.Order;
 import com.campus.timebank.entity.Task;
-import com.campus.timebank.service.impl.OrderServiceImpl;
-import com.campus.timebank.service.impl.TaskServiceImpl;
+import com.campus.timebank.service.IOrderService;
+import com.campus.timebank.service.ITaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,10 +18,10 @@ import java.util.stream.Collectors;
 public class OrderController {
 
     @Autowired
-    private OrderServiceImpl orderService;
+    private IOrderService orderService;
 
     @Autowired
-    private TaskServiceImpl taskService;
+    private ITaskService taskService;
 
     /**
      * 抢单
@@ -43,25 +43,22 @@ public class OrderController {
     /**
      * 确认完成
      * 入参: { "orderId": 201 } 或 { "taskId": 101 }
+     * 说明：我们在 Service 层实现了智能查找，这里只需要把非空的 ID 传进去即可
      */
     @PostMapping("/confirm")
     public Result<String> confirm(@RequestBody Map<String, Long> params) {
-        Long orderId = params.get("orderId");
-        Long taskId = params.get("taskId");
+        // 优先取 orderId，没有则取 taskId
+        Long id = params.get("orderId");
+        if (id == null) {
+            id = params.get("taskId");
+        }
+
+        if (id == null) return Result.error("订单ID或任务ID不能为空");
 
         try {
-            if (orderId != null) {
-                // 标准流程：通过 OrderId 确认
-                orderService.confirmOrder(orderId);
-            } else if (taskId != null) {
-                // 兼容流程：通过 TaskId 确认 (需要修改 OrderService 逻辑以支持或在这里查找)
-                // 鉴于 OrderService.confirmOrder 已经被修改为支持 TaskId 查找逻辑 (在之前的步骤中建议修改了 Service)
-                // 我们直接调用 confirmOrder 并传入 taskId 即可
-                // 注意：前提是你在 OrderServiceImpl.java 中实施了“按ID查不到Order就按TaskId查”的逻辑
-                orderService.confirmOrder(taskId);
-            } else {
-                return Result.error("ID不能为空");
-            }
+            // Service 层现在的 confirmOrder 方法已经具备了：
+            // "先查 Order，查不到就查该 Task 对应的进行中 Order" 的能力
+            orderService.confirmOrder(id);
             return Result.success("订单已完成，资金已结算");
         } catch (RuntimeException e) {
             return Result.error(e.getMessage());
@@ -70,30 +67,39 @@ public class OrderController {
 
     /**
      * 获取我参与的任务 (我抢的单)
+     * 用于前端“我的任务 - 我参与的”列表
      */
     @GetMapping("/my")
     public Result<List<Task>> myOrders() {
         Long userId = UserContext.getUserId();
 
-        // 1. 先查 Order 表，找到我接的所有单
+        // 1. 先查 Order 表，找到我作为接收者(Receiver)的所有订单
         List<Order> orders = orderService.lambdaQuery()
                 .eq(Order::getReceiverId, userId)
                 .orderByDesc(Order::getCreateTime)
                 .list();
 
+        // 如果没有接单记录，直接返回空列表
         if (orders.isEmpty()) {
             return Result.success(List.of());
         }
 
-        // 2. 拿到所有 taskId
-        List<Long> taskIds = orders.stream().map(Order::getTaskId).collect(Collectors.toList());
+        // 2. 提取所有关联的 taskId
+        List<Long> taskIds = orders.stream()
+                .map(Order::getTaskId)
+                .collect(Collectors.toList());
 
         // 3. 查 Task 表，返回任务详情
         if (taskIds.isEmpty()) {
             return Result.success(List.of());
         }
 
+        // 使用 MyBatis-Plus 的 listByIds 批量查询
         List<Task> tasks = taskService.listByIds(taskIds);
+
+        // 可选：在这里可以把 Order 的状态塞回 Task 对象里传给前端，
+        // 但为了简单，前端目前是根据 Task 表的状态显示的，通常也是同步的。
+
         return Result.success(tasks);
     }
 }

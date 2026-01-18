@@ -5,7 +5,7 @@ import com.campus.timebank.common.Result;
 import com.campus.timebank.common.UserContext;
 import com.campus.timebank.entity.Task;
 import com.campus.timebank.entity.TaskDto;
-import com.campus.timebank.service.impl.TaskServiceImpl;
+import com.campus.timebank.service.ITaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +17,7 @@ import java.util.List;
 public class TaskController {
 
     @Autowired
-    private TaskServiceImpl taskService;
+    private ITaskService taskService;
 
     @PostMapping("/publish")
     public Result<String> publish(@RequestBody @Validated TaskDto dto) {
@@ -47,11 +47,13 @@ public class TaskController {
 
     /**
      * 获取我发布的任务
+     * 用于前端“我的任务 - 我发布的”列表
      */
     @GetMapping("/my")
     public Result<List<Task>> myTasks() {
         Long userId = UserContext.getUserId();
-        // 查询 publisher_id = 当前用户的任务，按时间倒序
+        // 使用 MyBatis-Plus 的 lambdaQuery 链式查询
+        // 查询 publisher_id = 当前用户，并按创建时间倒序
         List<Task> list = taskService.lambdaQuery()
                 .eq(Task::getPublisherId, userId)
                 .orderByDesc(Task::getCreateTime)
