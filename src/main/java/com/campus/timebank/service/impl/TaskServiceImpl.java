@@ -33,16 +33,24 @@ public class TaskServiceImpl implements ITaskService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void publish(TaskDto dto) {
-        // ... (保持之前的代码不变) ...
-        // 为了节省篇幅，这里省略之前的 publish 代码，请保留你原来的内容！
-        // 只添加下面的新方法
+        // 1. 获取当前登录用户
         Long userId = UserContext.getUserId();
         User user = userMapper.selectById(userId);
+
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+
+        // 2. 校验余额是否充足
         if (user.getBalance().compareTo(dto.getPrice()) < 0) {
             throw new RuntimeException("余额不足，无法发布任务！");
         }
+
+        // 3. 扣除余额 (冻结资金)
         user.setBalance(user.getBalance().subtract(dto.getPrice()));
         userMapper.updateById(user);
+
+        // 4. 保存任务
         Task task = new Task();
         task.setPublisherId(userId);
         task.setTitle(dto.getTitle());
@@ -50,18 +58,21 @@ public class TaskServiceImpl implements ITaskService {
         task.setPrice(dto.getPrice());
         task.setCategory(dto.getCategory());
         task.setLocation(dto.getLocation());
-        task.setStatus(0);
+        task.setStatus(0); // 0: 待接单
         task.setCreateTime(LocalDateTime.now());
         taskMapper.insert(task);
+
+        // 5. 记录资金流水
         WalletLog log = new WalletLog();
         log.setUserId(userId);
-        log.setAmount(dto.getPrice().negate());
-        log.setType(2);
+        log.setAmount(dto.getPrice().negate()); // 记录为负数 (支出)
+        log.setType(2); // 2: 发布冻结
         log.setRemark("发布任务冻结: " + dto.getTitle());
         log.setCreateTime(LocalDateTime.now());
         walletLogMapper.insert(log);
     }
 
+    // --- 新增的方法 ---
     @Override
     public Page<Task> getTaskList(int pageNum, int pageSize, String category) {
         // 1. 构建分页对象
@@ -72,7 +83,7 @@ public class TaskServiceImpl implements ITaskService {
         query.eq("status", 0); // 只查待接单的
 
         // 如果传了分类，就按分类查
-        if (StringUtils.hasLength(category)) {
+        if (StringUtils.hasLength(category) && !"all".equals(category)) {
             query.eq("category", category);
         }
 

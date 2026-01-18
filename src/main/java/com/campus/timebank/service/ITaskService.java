@@ -5,6 +5,9 @@ import com.campus.timebank.entity.Task;
 import com.campus.timebank.entity.TaskDto;
 
 public interface ITaskService {
+    /**
+     * 发布任务
+     */
     void publish(TaskDto dto);
 
     /**
